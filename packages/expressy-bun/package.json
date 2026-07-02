@@ -19,6 +19,15 @@
   "engines": {
     "bun": ">=1.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KeniaNya/Expressy.git",
+    "directory": "packages/expressy-bun"
+  },
+  "homepage": "https://github.com/KeniaNya/Expressy#readme",
+  "bugs": {
+    "url": "https://github.com/KeniaNya/Expressy/issues"
+  },
   "keywords": [
     "bun",
     "http",
