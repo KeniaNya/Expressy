@@ -13,5 +13,5 @@
     "@types/bun": "latest",
     "nunjucks": "^3.2.4"
   },
-  "version": "0.0.1"
+  "version": "1.0.1"
 }
