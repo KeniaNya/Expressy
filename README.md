@@ -32,7 +32,7 @@ app.listen(3000);
 
 Same mental model as Express — routing, middleware, `next()`, error handlers, mountable routers — but running directly on `Bun.serve` with fetch-native `Request`/`Response` underneath and zero packages in `node_modules` (only `@types/bun` for editor types).
 
-See [packages/expressy/README.md](packages/expressy/README.md) for the full API and [demo/index.ts](demo/index.ts) for a complete, commented example.
+See [packages/expressy/README.md](packages/expressy/README.md) for the full API, [packages/expressy/MIGRATION.md](packages/expressy/MIGRATION.md) for an honest Express-compatibility breakdown (what's a drop-in, what isn't), and [demo/index.ts](demo/index.ts) for a complete, commented example.
 
 ## What the demo shows
 

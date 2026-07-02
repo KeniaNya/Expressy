@@ -18,6 +18,8 @@ app.listen(3000);
 
 Express carries years of Node-era baggage (30+ transitive dependencies, callback-based streams, no native TypeScript). Bun already ships an extremely fast HTTP server — Expressy just adds the ergonomics you actually use: routing, middleware, params, and `res.json()`.
 
+Coming from Express? Read **[MIGRATION.md](MIGRATION.md)** — an honest breakdown of what's a drop-in, what needs changing, and what isn't supported.
+
 ## Features
 
 - **Express-style routing** — `app.get/post/put/patch/delete/head/options/all(path, ...handlers)`
