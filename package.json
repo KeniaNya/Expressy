@@ -1,13 +1,14 @@
 {
   "name": "expressy-workspace",
-  "private": false,
+  "private": true,
   "workspaces": [
     "packages/*",
     "demo"
   ],
   "scripts": {
     "test": "bun test",
-    "demo": "bun run --cwd demo dev"
+    "demo": "bun run --cwd demo dev",
+    "publish:expressy": "npm publish --workspace expressy-bun"
   },
   "devDependencies": {
     "@types/bun": "latest",
