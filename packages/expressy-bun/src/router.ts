@@ -156,8 +156,10 @@ export class Router {
 
       const prevPath = req.path;
       const prevParams = req.params;
+      const prevBaseUrl = req.baseUrl;
       req.params = { ...prevParams, ...match.params };
       if (layer.isMount && match.matchedLength > 0) {
+        req.baseUrl = prevBaseUrl + req.path.slice(0, match.matchedLength);
         const stripped = req.path.slice(match.matchedLength);
         req.path = stripped.startsWith("/") ? stripped : `/${stripped}`;
       }
@@ -168,8 +170,13 @@ export class Router {
         called = true;
         req.path = prevPath;
         req.params = prevParams;
+        req.baseUrl = prevBaseUrl;
         next(e);
       };
+
+      // Kept on the request so late errors (e.g. res.render) can still
+      // reach the error-handling middleware after the handler returned.
+      req._next = restoreAndNext;
 
       try {
         const out = err !== undefined && layer.isErrorHandler

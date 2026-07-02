@@ -1,4 +1,7 @@
 import type { BunFile } from "bun";
+import { STATUS_CODES } from "node:http";
+import type { App } from "./application";
+import type { ExpressyRequest } from "./request";
 
 const TYPE_SHORTHANDS: Record<string, string> = {
   json: "application/json; charset=utf-8",
@@ -21,8 +24,10 @@ export interface CookieOptions {
   domain?: string;
   secure?: boolean;
   httpOnly?: boolean;
-  sameSite?: "Strict" | "Lax" | "None";
+  sameSite?: "Strict" | "Lax" | "None" | "strict" | "lax" | "none";
 }
+
+export type RenderCallback = (err: unknown, html?: string) => void;
 
 type SendableBody =
   | string
@@ -47,15 +52,37 @@ export class ExpressyResponse {
   statusCode = 200;
   readonly headers = new Headers();
   finished = false;
+  /** Per-response template variables, merged into every `res.render`. */
+  readonly locals: Record<string, any> = {};
+  /** The application handling this request. */
+  app?: App;
+  /** The request paired with this response. */
+  req?: ExpressyRequest;
 
   /** @internal Resolves the pending fetch handler with the final Response. */
   _onFinish?: (response: Response) => void;
   private finishListeners: Array<(res: ExpressyResponse) => void> = [];
+  private beforeSendListeners: Array<(res: ExpressyResponse) => void | Promise<void>> = [];
 
   /** Register a callback fired once the response has been sent. */
   onFinish(listener: (res: ExpressyResponse) => void): this {
     this.finishListeners.push(listener);
     return this;
+  }
+
+  /**
+   * Register a hook that runs after the handler finishes but before the
+   * Response is built — headers (e.g. Set-Cookie) can still be added.
+   * Hooks may be async; used by the session middleware for persistence.
+   */
+  onBeforeSend(listener: (res: ExpressyResponse) => void | Promise<void>): this {
+    this.beforeSendListeners.push(listener);
+    return this;
+  }
+
+  /** Express alias for `finished`. */
+  get headersSent(): boolean {
+    return this.finished;
   }
 
   status(code: number): this {
@@ -80,6 +107,31 @@ export class ExpressyResponse {
   append(field: string, value: string): this {
     this.headers.append(field, value);
     return this;
+  }
+
+  /** Node-style alias for `res.set` (accepts arrays like `setHeader` does). */
+  setHeader(field: string, value: string | number | readonly string[]): this {
+    if (Array.isArray(value)) {
+      this.headers.delete(field);
+      for (const v of value) this.headers.append(field, String(v));
+    } else {
+      this.headers.set(field, String(value));
+    }
+    return this;
+  }
+
+  /** Node-style alias for `res.get`. */
+  getHeader(field: string): string | undefined {
+    return this.headers.get(field) ?? undefined;
+  }
+
+  removeHeader(field: string): this {
+    this.headers.delete(field);
+    return this;
+  }
+
+  hasHeader(field: string): boolean {
+    return this.headers.has(field);
   }
 
   /** Set the Content-Type. Accepts shorthands ("json", "html", ...) or full MIME types. */
@@ -120,10 +172,54 @@ export class ExpressyResponse {
     this.finish(body);
   }
 
-  redirect(url: string, status = 302): void {
+  /** Set the status and send its standard text ("404 Not Found", ...). */
+  sendStatus(code: number): void {
+    this.statusCode = code;
+    if (!this.headers.has("Content-Type")) this.type("text");
+    this.finish(STATUS_CODES[code] ?? String(code));
+  }
+
+  /** Redirect. Accepts both `res.redirect(url, status?)` and Express's `res.redirect(status, url)`. */
+  redirect(url: string, status?: number): void;
+  redirect(status: number, url: string): void;
+  redirect(first: string | number, second?: string | number): void {
+    const status = typeof first === "number" ? first : typeof second === "number" ? second : 302;
+    const url = typeof first === "string" ? first : String(second);
     this.statusCode = status;
     this.headers.set("Location", url);
     this.finish(null);
+  }
+
+  /**
+   * Render a view through the app's template engine (see `app.engine` and
+   * the `views` / `view engine` settings). Locals are merged from
+   * `app.locals`, `res.locals`, and the argument, like Express. Without a
+   * callback, errors flow to the error-handling middleware.
+   */
+  render(view: string, options?: Record<string, unknown> | RenderCallback, callback?: RenderCallback): void {
+    const opts = typeof options === "function" ? undefined : options;
+    const cb = typeof options === "function" ? options : callback;
+    const done: RenderCallback =
+      cb ??
+      ((err, html) => {
+        if (err) {
+          const forward = this.req?._next;
+          if (forward) return forward(err);
+          if (!this.finished) {
+            console.error("[expressy] render failed:", err);
+            this.status(500).type("text").end("Internal Server Error");
+          }
+          return;
+        }
+        this.html(html ?? "");
+      });
+    if (!this.app) return done(new Error("res.render() needs an app context"));
+    const locals = { ...this.app.locals, ...this.locals, ...opts };
+    try {
+      this.app.render(view, locals, done);
+    } catch (err) {
+      done(err);
+    }
   }
 
   /** Send a file from disk. Content-Type is inferred from the extension. */
@@ -144,10 +240,19 @@ export class ExpressyResponse {
    */
   send(body?: SendableBody): void {
     if (body instanceof Response) {
+      if (this.finished) {
+        throw new Error("Response already sent — cannot send again");
+      }
       this.finished = true;
-      const merged = new Response(body.body, body);
-      for (const [k, v] of this.headers) merged.headers.set(k, v);
-      this.emit(merged);
+      this.runBeforeSend(() => {
+        const merged = new Response(body.body, body);
+        for (const [k, v] of this.headers) {
+          if (k === "set-cookie") continue;
+          merged.headers.set(k, v);
+        }
+        for (const c of this.headers.getSetCookie()) merged.headers.append("Set-Cookie", c);
+        this.emit(merged);
+      });
       return;
     }
 
@@ -183,8 +288,25 @@ export class ExpressyResponse {
       throw new Error("Response already sent — cannot send again");
     }
     this.finished = true;
-    const finalBody = EMPTY_STATUS.has(this.statusCode) ? null : body;
-    this.emit(new Response(finalBody, { status: this.statusCode, headers: this.headers }));
+    this.runBeforeSend(() => {
+      const finalBody = EMPTY_STATUS.has(this.statusCode) ? null : body;
+      this.emit(new Response(finalBody, { status: this.statusCode, headers: this.headers }));
+    });
+  }
+
+  private runBeforeSend(complete: () => void): void {
+    if (this.beforeSendListeners.length === 0) return complete();
+    const hooks = this.beforeSendListeners.splice(0);
+    void (async () => {
+      for (const hook of hooks) {
+        try {
+          await hook(this);
+        } catch (err) {
+          console.error("[expressy] beforeSend hook failed:", err);
+        }
+      }
+      complete();
+    })();
   }
 
   private emit(response: Response): void {

@@ -31,8 +31,11 @@ Coming from Express? Read **[MIGRATION.md](MIGRATION.md)** — an honest breakdo
 - **Middleware with `next()`** — including path-scoped mounts and Express-style 4-arity error handlers
 - **Mountable routers** — `app.use("/api/notes", router)`, with mount-path params merging (`/users/:userId/posts` + `/:postId`)
 - **Async everywhere** — `async` handlers just work; rejections flow into your error middleware
-- **Body parsers** — `json()` and `urlencoded()` built in
+- **Body parsers** — `json()` and `urlencoded()` built in, with `limit` and qs-style `extended` options
 - **Static files** — `serveStatic(dir)` using `Bun.file` (zero-copy sendfile, automatic MIME types)
+- **Native sessions** — `session()` with the express-session API (signed cookies, stores, `regenerate`/`save`/`destroy`)
+- **View engines** — `app.engine()`, `app.set("view engine", ...)`, `res.render()` with `app.locals`/`res.locals`; nunjucks's `express:` option works out of the box
+- **Settings** — `app.set`/`app.get`/`enable`/`disable`, including `trust proxy` (X-Forwarded-For/-Proto/-Host)
 - **fetch-native** — the app *is* a fetch handler; handlers may also return a plain `Response`
 
 ## API tour
@@ -71,9 +74,11 @@ app.use("/api/notes", api);                  // api sees paths relative to the m
 | `req.params` | Route params (`:id`, `*`) — URL-decoded |
 | `req.query` | Parsed query string; repeated keys become arrays |
 | `req.body` | Set by `json()` / `urlencoded()` middleware |
-| `req.path`, `req.originalUrl` | Current (mount-relative) path / original path+query |
-| `req.method`, `req.headers`, `req.get(name)` | The usual suspects |
-| `req.hostname`, `req.protocol`, `req.secure`, `req.ip` | Connection info |
+| `req.path`, `req.originalUrl`, `req.url`, `req.baseUrl` | Current (mount-relative) path / original path+query / mount prefix |
+| `req.method`, `req.headers`, `req.get(name)` | `req.headers` is a plain lowercase-keyed object, like Node/Express |
+| `req.cookies` | Parsed `Cookie` header |
+| `req.session`, `req.sessionID` | Set by the `session()` middleware |
+| `req.hostname`, `req.protocol`, `req.secure`, `req.ip` | Connection info; honors the `trust proxy` setting |
 | `req.is("json")` | Content-Type check |
 | `await req.json()` / `req.text()` / `req.formData()` | Manual body reading (text/json are cached) |
 | `req.raw` | The untouched fetch `Request` |
@@ -85,12 +90,55 @@ res.status(201).json({ ok: true });
 res.send("<h1>html</h1>");        // strings → text/html, objects → JSON, Blob/BunFile pass through
 res.text("plain"); res.html("<b>hi</b>");
 res.set("X-Powered-By", "expressy").type("json");
-res.redirect("/login");           // res.redirect(url, 301)
+res.setHeader("Content-Disposition", "attachment");  // Node-style aliases too
+res.redirect("/login");           // both (url, status) and Express's (status, url) work
+res.sendStatus(404);              // "Not Found"
+res.render("perfil", { user });   // via app.engine / view engine setting
 await res.sendFile("./report.pdf");
 res.cookie("session", token, { httpOnly: true, sameSite: "Lax" });
+res.locals.user = currentUser;    // per-request template locals
 res.onFinish((res) => log(res.statusCode));  // fires after the response is sent
 res.end();                        // empty body
 ```
+
+### Sessions
+
+Express-session-compatible, built in — same options, same signed-cookie wire
+format, same store contract (callback-based, so `connect-mongo`-style stores plug in):
+
+```ts
+import expressy, { session } from "expressy-bun";
+
+app.use(session({
+  secret: process.env.SESSION_SECRET!,   // string or [newest, ...older] for rotation
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 8 * 60 * 60 * 1000, httpOnly: true, sameSite: "lax", secure: "auto" },
+  // store: new MyStore(),               // defaults to MemoryStore (dev only)
+}));
+
+app.post("/login", async (req, res) => {
+  await req.session.regenerate();        // promise or callback style
+  req.session.user = { name: "Kenia" };
+  await req.session.save();
+  res.redirect("/");
+});
+app.post("/logout", (req, res) => req.session.destroy(() => res.redirect("/login")));
+```
+
+### Views
+
+```ts
+app.set("views", "./views");
+app.set("view engine", "html");
+app.engine("html", (path, locals, cb) => cb(null, myRender(path, locals)));
+app.locals.site = "MyApp";                       // merged into every render
+app.use((req, res, next) => { res.locals.user = req.session?.user; next(); });
+app.get("/", (req, res) => res.render("home", { title: "Inicio" }));
+```
+
+Engines that install themselves through Express's View-class hook work as-is —
+e.g. `nunjucks.configure("views", { express: app })`.
 
 ### Middleware & error handling
 

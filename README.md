@@ -11,7 +11,7 @@ demo/                Notes app: REST API + static frontend built with the librar
 
 ```sh
 bun install        # links the workspace
-bun test           # run the library's test suite (20 tests)
+bun test           # run the library's test suite (51 tests)
 bun run demo       # start the demo at http://localhost:3000 (hot reload)
 ```
 
@@ -30,7 +30,7 @@ app.get("/hello/:name", (req, res) => {
 app.listen(3000);
 ```
 
-Same mental model as Express — routing, middleware, `next()`, error handlers, mountable routers — but running directly on `Bun.serve` with fetch-native `Request`/`Response` underneath and zero packages in `node_modules` (only `@types/bun` for editor types).
+Same mental model as Express — routing, middleware, `next()`, error handlers, mountable routers, sessions (`session()`, express-session-compatible), view engines (`res.render`, works with nunjucks), settings (`trust proxy`) — but running directly on `Bun.serve` with fetch-native `Request`/`Response` underneath and zero runtime dependencies.
 
 See [packages/expressy-bun/README.md](packages/expressy-bun/README.md) for the full API, [packages/expressy-bun/MIGRATION.md](packages/expressy-bun/MIGRATION.md) for an honest Express-compatibility breakdown (what's a drop-in, what isn't), and [demo/index.ts](demo/index.ts) for a complete, commented example.
 
