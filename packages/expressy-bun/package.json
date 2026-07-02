@@ -1,5 +1,5 @@
 {
-  "name": "expressy",
+  "name": "expressy-bun",
   "version": "0.1.0",
   "description": "Express-like micro framework built directly on Bun.serve. Zero dependencies, no build step.",
   "type": "module",
@@ -9,9 +9,25 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "files": [
+    "src",
+    "MIGRATION.md"
+  ],
   "scripts": {
     "test": "bun test"
   },
-  "keywords": ["bun", "http", "router", "express", "middleware"],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "keywords": [
+    "bun",
+    "http",
+    "server",
+    "router",
+    "express",
+    "middleware",
+    "framework",
+    "zero-dependencies"
+  ],
   "license": "MIT"
 }

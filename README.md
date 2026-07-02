@@ -3,7 +3,7 @@
 A lightweight, zero-dependency, Express-like framework for Bun — plus a demo app that showcases it.
 
 ```
-packages/expressy/   The library (≈600 lines of TypeScript, no dependencies, no build step)
+packages/expressy-bun/   The library (≈600 lines of TypeScript, no dependencies, no build step)
 demo/                Notes app: REST API + static frontend built with the library
 ```
 
@@ -18,7 +18,7 @@ bun run demo       # start the demo at http://localhost:3000 (hot reload)
 ## The 10-second pitch
 
 ```ts
-import expressy, { Router, json } from "expressy";
+import expressy, { Router, json } from "expressy-bun";
 
 const app = expressy();
 app.use(json());
@@ -32,7 +32,7 @@ app.listen(3000);
 
 Same mental model as Express — routing, middleware, `next()`, error handlers, mountable routers — but running directly on `Bun.serve` with fetch-native `Request`/`Response` underneath and zero packages in `node_modules` (only `@types/bun` for editor types).
 
-See [packages/expressy/README.md](packages/expressy/README.md) for the full API, [packages/expressy/MIGRATION.md](packages/expressy/MIGRATION.md) for an honest Express-compatibility breakdown (what's a drop-in, what isn't), and [demo/index.ts](demo/index.ts) for a complete, commented example.
+See [packages/expressy-bun/README.md](packages/expressy-bun/README.md) for the full API, [packages/expressy-bun/MIGRATION.md](packages/expressy-bun/MIGRATION.md) for an honest Express-compatibility breakdown (what's a drop-in, what isn't), and [demo/index.ts](demo/index.ts) for a complete, commented example.
 
 ## What the demo shows
 

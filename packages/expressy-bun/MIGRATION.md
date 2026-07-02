@@ -48,7 +48,7 @@ app.use(express.static("public"));
 
 ```ts
 // Expressy
-import expressy, { Router, json, serveStatic } from "expressy";
+import expressy, { Router, json, serveStatic } from "expressy-bun";
 const app = expressy();
 const router = new Router();        // class, not a factory call
 app.use(json());

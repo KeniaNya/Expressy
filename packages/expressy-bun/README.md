@@ -3,8 +3,12 @@
 An Express-like micro framework built directly on **`Bun.serve`**.
 Zero dependencies, no build step — it's just a handful of TypeScript files that Bun runs natively.
 
+```sh
+bun add expressy-bun
+```
+
 ```ts
-import expressy from "expressy";
+import expressy from "expressy-bun";
 
 const app = expressy();
 
@@ -91,7 +95,7 @@ res.end();                        // empty body
 ### Middleware & error handling
 
 ```ts
-import expressy, { json, urlencoded, serveStatic, HttpError } from "expressy";
+import expressy, { json, urlencoded, serveStatic, HttpError } from "expressy-bun";
 
 app.use(json());                       // req.body for application/json
 app.use(urlencoded());                 // req.body for form posts

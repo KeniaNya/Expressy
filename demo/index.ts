@@ -1,5 +1,5 @@
-import expressy, { Router, json, serveStatic, HttpError } from "expressy";
-import type { Handler, ErrorHandler } from "expressy";
+import expressy, { Router, json, serveStatic, HttpError } from "expressy-bun";
+import type { Handler, ErrorHandler } from "expressy-bun";
 
 const app = expressy();
 
