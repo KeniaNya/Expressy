@@ -1,6 +1,6 @@
 {
   "name": "expressy-workspace",
-  "private": true,
+  "private": false,
   "workspaces": [
     "packages/*",
     "demo"
