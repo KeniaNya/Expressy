@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expressy Demo — Notes</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>⚡ Expressy</h1>
+      <p>An Express-like micro framework on <code>Bun.serve</code> — zero dependencies.<br/>
+      This page is served by <code>serveStatic()</code> and talks to a mounted <code>Router</code> at <code>/api/notes</code>.</p>
+    </header>
+
+    <form id="note-form">
+      <input id="title" placeholder="Note title" required />
+      <textarea id="content" placeholder="Write something…" rows="3"></textarea>
+      <button type="submit">Add note</button>
+    </form>
+
+    <div class="toolbar">
+      <input id="search" placeholder="🔍 Search notes (uses ?q= query param)" />
+    </div>
+
+    <ul id="notes"></ul>
+
+    <footer>
+      Try the API directly:
+      <code>GET /api/notes</code> ·
+      <code>GET /api/greet/:name</code> ·
+      <code>GET /api/boom</code> (error handling) ·
+      <code>GET /old-home</code> (redirect)
+    </footer>
+  </main>
+
+  <script>
+    const list = document.getElementById("notes");
+    const form = document.getElementById("note-form");
+    const search = document.getElementById("search");
+
+    async function load(q = "") {
+      const res = await fetch("/api/notes" + (q ? "?q=" + encodeURIComponent(q) : ""));
+      const notes = await res.json();
+      list.innerHTML = notes.length
+        ? notes.map(n => `
+            <li>
+              <div>
+                <strong>${escapeHtml(n.title)}</strong>
+                <p>${escapeHtml(n.content)}</p>
+                <small>#${n.id} · ${new Date(n.createdAt).toLocaleString()}</small>
+              </div>
+              <button data-id="${n.id}" class="delete" title="Delete">✕</button>
+            </li>`).join("")
+        : "<li class='empty'>No notes found.</li>";
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[c]);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: document.getElementById("title").value,
+          content: document.getElementById("content").value,
+        }),
+      });
+      if (res.ok) {
+        form.reset();
+        load(search.value);
+      } else {
+        alert((await res.json()).error);
+      }
+    });
+
+    list.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".delete");
+      if (!btn) return;
+      await fetch("/api/notes/" + btn.dataset.id, { method: "DELETE" });
+      load(search.value);
+    });
+
+    let timer;
+    search.addEventListener("input", () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => load(search.value), 200);
+    });
+
+    load();
+  </script>
+</body>
+</html>

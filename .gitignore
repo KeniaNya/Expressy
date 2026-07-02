@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Bun (lockfile is committed on purpose for reproducible installs)
+.bun/
+
+# Build output (none today, but just in case)
+dist/
+out/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

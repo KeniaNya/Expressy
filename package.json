@@ -1,0 +1,15 @@
+{
+  "name": "expressy-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "demo"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "demo": "bun run --cwd demo dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
