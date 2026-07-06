@@ -1,6 +1,6 @@
 {
   "name": "expressy-bun",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Express-like micro framework built directly on Bun.serve. Zero dependencies, no build step.",
   "type": "module",
   "main": "src/index.ts",
