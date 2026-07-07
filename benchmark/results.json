@@ -1,0 +1,1220 @@
+{
+  "meta": {
+    "date": "2026-07-07T21:30:08.669Z",
+    "quick": false,
+    "config": {
+      "baseConnections": 64,
+      "sweepConnections": [
+        16,
+        64,
+        256
+      ],
+      "warmupS": 2,
+      "durationS": 6,
+      "trials": 3,
+      "pipelining": 1
+    },
+    "versions": {
+      "bun": "1.2.2",
+      "node": "v22.13.1",
+      "express": "5.2.1"
+    },
+    "machine": {
+      "cpu": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+      "cores": 8,
+      "memGB": 17,
+      "platform": "win32 10.0.22621"
+    }
+  },
+  "results": [
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "plaintext",
+      "scenarioTitle": "Plain text",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15014.67,
+      "rpsTrials": [
+        15015,
+        14780,
+        15517
+      ],
+      "rpsSpread": 0.049107972402989884,
+      "latency": {
+        "mean": 3.72,
+        "p50": 3,
+        "p90": 5,
+        "p99": 10,
+        "max": 27
+      },
+      "throughputBytes": 1951744,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 90084
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15185.34,
+      "rpsTrials": [
+        15185,
+        15903,
+        14915
+      ],
+      "rpsSpread": 0.06506275131146223,
+      "latency": {
+        "mean": 3.71,
+        "p50": 3,
+        "p90": 5,
+        "p99": 7,
+        "max": 42
+      },
+      "throughputBytes": 2277376,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91111
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "params",
+      "scenarioTitle": "Route params",
+      "connections": 64,
+      "sweep": false,
+      "rps": 12948,
+      "rpsTrials": [
+        14539,
+        12693,
+        12948
+      ],
+      "rpsSpread": 0.14251853568118628,
+      "latency": {
+        "mean": 4.44,
+        "p50": 4,
+        "p90": 5,
+        "p99": 13,
+        "max": 37
+      },
+      "throughputBytes": 1734826.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 77681
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "query",
+      "scenarioTitle": "Query string",
+      "connections": 64,
+      "sweep": false,
+      "rps": 12464,
+      "rpsTrials": [
+        12647,
+        12464,
+        12252
+      ],
+      "rpsSpread": 0.03166479460847241,
+      "latency": {
+        "mean": 4.65,
+        "p50": 4,
+        "p90": 6,
+        "p99": 12,
+        "max": 32
+      },
+      "throughputBytes": 1857194.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 74776
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "middleware",
+      "scenarioTitle": "Middleware ×5",
+      "connections": 64,
+      "sweep": false,
+      "rps": 13589.34,
+      "rpsTrials": [
+        13025,
+        13589,
+        13767
+      ],
+      "rpsSpread": 0.0545523182141296,
+      "latency": {
+        "mean": 4.2,
+        "p50": 4,
+        "p90": 6,
+        "p99": 9,
+        "max": 28
+      },
+      "throughputBytes": 1820672,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 81528
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "post-json",
+      "scenarioTitle": "POST JSON echo",
+      "connections": 64,
+      "sweep": false,
+      "rps": 10733.34,
+      "rpsTrials": [
+        10748,
+        10637,
+        10733
+      ],
+      "rpsSpread": 0.010309931484514593,
+      "latency": {
+        "mean": 5.47,
+        "p50": 5,
+        "p90": 7,
+        "p99": 11,
+        "max": 64
+      },
+      "throughputBytes": 1996202.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 64401
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json-large",
+      "scenarioTitle": "JSON (100 items)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 7467.34,
+      "rpsTrials": [
+        7662,
+        7467,
+        4083
+      ],
+      "rpsSpread": 0.4793326673219647,
+      "latency": {
+        "mean": 8.06,
+        "p50": 7,
+        "p90": 11,
+        "p99": 20,
+        "max": 37
+      },
+      "throughputBytes": 63804757.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 44799
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 16,
+      "sweep": true,
+      "rps": 15329.34,
+      "rpsTrials": [
+        13576,
+        15329,
+        15375
+      ],
+      "rpsSpread": 0.11733512336473717,
+      "latency": {
+        "mean": 0.35,
+        "p50": 0,
+        "p90": 1,
+        "p99": 2,
+        "max": 16
+      },
+      "throughputBytes": 2299989.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91979
+    },
+    {
+      "target": "expressy-bun",
+      "label": "Expressy · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 256,
+      "sweep": true,
+      "rps": 14849.34,
+      "rpsTrials": [
+        15216,
+        14849,
+        14511
+      ],
+      "rpsSpread": 0.04749908076722601,
+      "latency": {
+        "mean": 16.83,
+        "p50": 16,
+        "p90": 18,
+        "p99": 23,
+        "max": 102
+      },
+      "throughputBytes": 2227541.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 89098
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "plaintext",
+      "scenarioTitle": "Plain text",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4309.5,
+      "rpsTrials": [
+        4310,
+        4338,
+        4295
+      ],
+      "rpsSpread": 0.010054530688014833,
+      "latency": {
+        "mean": 14.35,
+        "p50": 14,
+        "p90": 25,
+        "p99": 55,
+        "max": 88
+      },
+      "throughputBytes": 1038464,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 25856
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4217.34,
+      "rpsTrials": [
+        4217,
+        4174,
+        4241
+      ],
+      "rpsSpread": 0.015886791200140374,
+      "latency": {
+        "mean": 14.63,
+        "p50": 14,
+        "p90": 27,
+        "p99": 52,
+        "max": 82
+      },
+      "throughputBytes": 1104896,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 25303
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "params",
+      "scenarioTitle": "Route params",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4282.67,
+      "rpsTrials": [
+        4293,
+        4283,
+        4267
+      ],
+      "rpsSpread": 0.005914534624428202,
+      "latency": {
+        "mean": 14.43,
+        "p50": 14,
+        "p90": 29,
+        "p99": 51,
+        "max": 77
+      },
+      "throughputBytes": 1048917.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 25692
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "query",
+      "scenarioTitle": "Query string",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4117.84,
+      "rpsTrials": [
+        4118,
+        4172,
+        4091
+      ],
+      "rpsSpread": 0.01979192974957745,
+      "latency": {
+        "mean": 15.02,
+        "p50": 15,
+        "p90": 26,
+        "p99": 50,
+        "max": 74
+      },
+      "throughputBytes": 1074560,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 24701
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "middleware",
+      "scenarioTitle": "Middleware ×5",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4145.5,
+      "rpsTrials": [
+        4146,
+        4197,
+        3990
+      ],
+      "rpsSpread": 0.04985405861777833,
+      "latency": {
+        "mean": 14.93,
+        "p50": 14,
+        "p90": 28,
+        "p99": 50,
+        "max": 113
+      },
+      "throughputBytes": 1015552,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 24872
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "post-json",
+      "scenarioTitle": "POST JSON echo",
+      "connections": 64,
+      "sweep": false,
+      "rps": 3504.67,
+      "rpsTrials": [
+        3505,
+        3543,
+        3472
+      ],
+      "rpsSpread": 0.020067509922474847,
+      "latency": {
+        "mean": 17.74,
+        "p50": 17,
+        "p90": 20,
+        "p99": 23,
+        "max": 63
+      },
+      "throughputBytes": 1044309.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 21026
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "json-large",
+      "scenarioTitle": "JSON (100 items)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 3202.34,
+      "rpsTrials": [
+        3202,
+        3231,
+        3162
+      ],
+      "rpsSpread": 0.02154674394349132,
+      "latency": {
+        "mean": 19.47,
+        "p50": 19,
+        "p90": 23,
+        "p99": 37,
+        "max": 89
+      },
+      "throughputBytes": 27729920,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 19212
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 16,
+      "sweep": true,
+      "rps": 4332,
+      "rpsTrials": [
+        4332,
+        4355,
+        4247
+      ],
+      "rpsSpread": 0.024815327793167127,
+      "latency": {
+        "mean": 3.17,
+        "p50": 3,
+        "p90": 7,
+        "p99": 15,
+        "max": 31
+      },
+      "throughputBytes": 1135104,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 25993
+    },
+    {
+      "target": "express-node",
+      "label": "Express · Node",
+      "group": "framework",
+      "runtime": "node",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 256,
+      "sweep": true,
+      "rps": 4106,
+      "rpsTrials": [
+        4206,
+        4106,
+        4096
+      ],
+      "rpsSpread": 0.02679006332196785,
+      "latency": {
+        "mean": 69.55,
+        "p50": 71,
+        "p90": 128,
+        "p99": 284,
+        "max": 526
+      },
+      "throughputBytes": 1075541.34,
+      "non2xx": 0,
+      "errors": 35,
+      "timeouts": 0,
+      "totalRequests": 24632
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "plaintext",
+      "scenarioTitle": "Plain text",
+      "connections": 64,
+      "sweep": false,
+      "rps": 11150.67,
+      "rpsTrials": [
+        10825,
+        11151,
+        11480
+      ],
+      "rpsSpread": 0.05871037345737968,
+      "latency": {
+        "mean": 5.21,
+        "p50": 5,
+        "p90": 7,
+        "p99": 10,
+        "max": 29
+      },
+      "throughputBytes": 2163114.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 66899
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 8217.67,
+      "rpsTrials": [
+        9135,
+        7279,
+        8218
+      ],
+      "rpsSpread": 0.22593630554646268,
+      "latency": {
+        "mean": 7.31,
+        "p50": 7,
+        "p90": 10,
+        "p99": 16,
+        "max": 33
+      },
+      "throughputBytes": 1766570.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 49299
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "params",
+      "scenarioTitle": "Route params",
+      "connections": 64,
+      "sweep": false,
+      "rps": 7700,
+      "rpsTrials": [
+        7670,
+        7902,
+        7700
+      ],
+      "rpsSpread": 0.03012987012987013,
+      "latency": {
+        "mean": 7.82,
+        "p50": 7,
+        "p90": 11,
+        "p99": 18,
+        "max": 33
+      },
+      "throughputBytes": 1524224,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 46192
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "query",
+      "scenarioTitle": "Query string",
+      "connections": 64,
+      "sweep": false,
+      "rps": 7808.67,
+      "rpsTrials": [
+        7809,
+        7797,
+        7910
+      ],
+      "rpsSpread": 0.014385292245670507,
+      "latency": {
+        "mean": 7.69,
+        "p50": 7,
+        "p90": 10,
+        "p99": 15,
+        "max": 28
+      },
+      "throughputBytes": 1670997.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 46851
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "middleware",
+      "scenarioTitle": "Middleware ×5",
+      "connections": 64,
+      "sweep": false,
+      "rps": 8464.67,
+      "rpsTrials": [
+        9064,
+        7671,
+        8465
+      ],
+      "rpsSpread": 0.16460535378225022,
+      "latency": {
+        "mean": 7.07,
+        "p50": 7,
+        "p90": 9,
+        "p99": 14,
+        "max": 29
+      },
+      "throughputBytes": 1675605.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 50777
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "post-json",
+      "scenarioTitle": "POST JSON echo",
+      "connections": 64,
+      "sweep": false,
+      "rps": 4244.5,
+      "rpsTrials": [
+        4245,
+        5083,
+        4018
+      ],
+      "rpsSpread": 0.2510307456708682,
+      "latency": {
+        "mean": 14.59,
+        "p50": 14,
+        "p90": 19,
+        "p99": 29,
+        "max": 40
+      },
+      "throughputBytes": 1065173.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 25460
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json-large",
+      "scenarioTitle": "JSON (100 items)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 3862.5,
+      "rpsTrials": [
+        3855,
+        3865,
+        3863
+      ],
+      "rpsSpread": 0.0026770226537217207,
+      "latency": {
+        "mean": 16.05,
+        "p50": 16,
+        "p90": 19,
+        "p99": 26,
+        "max": 33
+      },
+      "throughputBytes": 33259520,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 23172
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 16,
+      "sweep": true,
+      "rps": 7253.34,
+      "rpsTrials": [
+        7103,
+        7253,
+        7489
+      ],
+      "rpsSpread": 0.053124491613518725,
+      "latency": {
+        "mean": 1.73,
+        "p50": 2,
+        "p90": 2,
+        "p99": 7,
+        "max": 24
+      },
+      "throughputBytes": 1559040,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 43512
+    },
+    {
+      "target": "express-bun",
+      "label": "Express · Bun",
+      "group": "framework",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 256,
+      "sweep": true,
+      "rps": 9225.34,
+      "rpsTrials": [
+        9380,
+        9079,
+        9225
+      ],
+      "rpsSpread": 0.03262752375522203,
+      "latency": {
+        "mean": 27.21,
+        "p50": 26,
+        "p90": 31,
+        "p99": 48,
+        "max": 117
+      },
+      "throughputBytes": 1983573.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 55346
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "plaintext",
+      "scenarioTitle": "Plain text",
+      "connections": 64,
+      "sweep": false,
+      "rps": 14318.67,
+      "rpsTrials": [
+        14076,
+        14319,
+        14995
+      ],
+      "rpsSpread": 0.06415889185238574,
+      "latency": {
+        "mean": 3.94,
+        "p50": 4,
+        "p90": 5,
+        "p99": 6,
+        "max": 26
+      },
+      "throughputBytes": 1861461.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 85910
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15186.67,
+      "rpsTrials": [
+        15485,
+        15187,
+        15051
+      ],
+      "rpsSpread": 0.028621811101446206,
+      "latency": {
+        "mean": 3.64,
+        "p50": 3,
+        "p90": 5,
+        "p99": 6,
+        "max": 51
+      },
+      "throughputBytes": 2263040,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91114
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "params",
+      "scenarioTitle": "Route params",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15268,
+      "rpsTrials": [
+        15268,
+        15287,
+        15268
+      ],
+      "rpsSpread": 0.0012228189677757448,
+      "latency": {
+        "mean": 3.62,
+        "p50": 3,
+        "p90": 5,
+        "p99": 6,
+        "max": 25
+      },
+      "throughputBytes": 2030250.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91594
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "query",
+      "scenarioTitle": "Query string",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15306.67,
+      "rpsTrials": [
+        14973,
+        15307,
+        15397
+      ],
+      "rpsSpread": 0.02770034239975122,
+      "latency": {
+        "mean": 3.59,
+        "p50": 3,
+        "p90": 4,
+        "p99": 6,
+        "max": 25
+      },
+      "throughputBytes": 2265429.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91844
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "middleware",
+      "scenarioTitle": "Middleware ×5",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15313.34,
+      "rpsTrials": [
+        15313,
+        15367,
+        15196
+      ],
+      "rpsSpread": 0.011145184525387673,
+      "latency": {
+        "mean": 3.6,
+        "p50": 3,
+        "p90": 5,
+        "p99": 6,
+        "max": 26
+      },
+      "throughputBytes": 2036736,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 91876
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "post-json",
+      "scenarioTitle": "POST JSON echo",
+      "connections": 64,
+      "sweep": false,
+      "rps": 15345.34,
+      "rpsTrials": [
+        15345,
+        15364,
+        14145
+      ],
+      "rpsSpread": 0.07941564018783552,
+      "latency": {
+        "mean": 3.59,
+        "p50": 3,
+        "p90": 4,
+        "p99": 6,
+        "max": 27
+      },
+      "throughputBytes": 2838869.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 92074
+    },
+    {
+      "target": "raw-bun",
+      "label": "raw Bun.serve",
+      "group": "baseline",
+      "runtime": "bun",
+      "scenario": "json-large",
+      "scenarioTitle": "JSON (100 items)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 10618.67,
+      "rpsTrials": [
+        10204,
+        10619,
+        11509
+      ],
+      "rpsSpread": 0.12295984337021491,
+      "latency": {
+        "mean": 5.52,
+        "p50": 5,
+        "p90": 7,
+        "p99": 9,
+        "max": 25
+      },
+      "throughputBytes": 90756437.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 63709
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "plaintext",
+      "scenarioTitle": "Plain text",
+      "connections": 64,
+      "sweep": false,
+      "rps": 14242.67,
+      "rpsTrials": [
+        14243,
+        14173,
+        14324
+      ],
+      "rpsSpread": 0.010578072791126934,
+      "latency": {
+        "mean": 3.92,
+        "p50": 4,
+        "p90": 5,
+        "p99": 6,
+        "max": 27
+      },
+      "throughputBytes": 2777088,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 85453
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "json",
+      "scenarioTitle": "JSON (small)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 13904,
+      "rpsTrials": [
+        13904,
+        13697,
+        14047
+      ],
+      "rpsSpread": 0.0251244246260069,
+      "latency": {
+        "mean": 4.08,
+        "p50": 4,
+        "p90": 5,
+        "p99": 7,
+        "max": 28
+      },
+      "throughputBytes": 3003050.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 83424
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "params",
+      "scenarioTitle": "Route params",
+      "connections": 64,
+      "sweep": false,
+      "rps": 12842.67,
+      "rpsTrials": [
+        12680,
+        12843,
+        13984
+      ],
+      "rpsSpread": 0.10153651849654316,
+      "latency": {
+        "mean": 4.46,
+        "p50": 4,
+        "p90": 6,
+        "p99": 9,
+        "max": 30
+      },
+      "throughputBytes": 2555562.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 77045
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "query",
+      "scenarioTitle": "Query string",
+      "connections": 64,
+      "sweep": false,
+      "rps": 13666.67,
+      "rpsTrials": [
+        13353,
+        13667,
+        13937
+      ],
+      "rpsSpread": 0.04273169689470807,
+      "latency": {
+        "mean": 4.18,
+        "p50": 4,
+        "p90": 5,
+        "p99": 7,
+        "max": 25
+      },
+      "throughputBytes": 2938197.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 81989
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "middleware",
+      "scenarioTitle": "Middleware ×5",
+      "connections": 64,
+      "sweep": false,
+      "rps": 14282.67,
+      "rpsTrials": [
+        14283,
+        14097,
+        14321
+      ],
+      "rpsSpread": 0.015683342120205817,
+      "latency": {
+        "mean": 3.94,
+        "p50": 4,
+        "p90": 5,
+        "p99": 6,
+        "max": 29
+      },
+      "throughputBytes": 2841941.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 85689
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "post-json",
+      "scenarioTitle": "POST JSON echo",
+      "connections": 64,
+      "sweep": false,
+      "rps": 11781.34,
+      "rpsTrials": [
+        11904,
+        11751,
+        11781
+      ],
+      "rpsSpread": 0.01301464858836091,
+      "latency": {
+        "mean": 4.87,
+        "p50": 5,
+        "p90": 6,
+        "p99": 7,
+        "max": 27
+      },
+      "throughputBytes": 2968917.34,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 70684
+    },
+    {
+      "target": "raw-node",
+      "label": "raw node:http",
+      "group": "baseline",
+      "runtime": "node",
+      "scenario": "json-large",
+      "scenarioTitle": "JSON (100 items)",
+      "connections": 64,
+      "sweep": false,
+      "rps": 11842.67,
+      "rpsTrials": [
+        11828,
+        12028,
+        11843
+      ],
+      "rpsSpread": 0.016888083514950598,
+      "latency": {
+        "mean": 4.86,
+        "p50": 5,
+        "p90": 6,
+        "p99": 7,
+        "max": 35
+      },
+      "throughputBytes": 101984938.67,
+      "non2xx": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "totalRequests": 71052
+    }
+  ]
+}

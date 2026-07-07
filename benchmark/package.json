@@ -1,0 +1,16 @@
+{
+  "name": "expressy-benchmark",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Head-to-head benchmark: Expressy (Bun.serve) vs official Express.",
+  "scripts": {
+    "bench": "node run.mjs",
+    "bench:quick": "node run.mjs --quick",
+    "report": "node report.mjs"
+  },
+  "dependencies": {
+    "autocannon": "^7.15.0",
+    "express": "^5.1.0"
+  }
+}

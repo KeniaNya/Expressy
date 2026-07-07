@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "demo/index.ts"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "bench-report",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "benchmark/preview.ts"],
+      "port": 4321,
+      "autoPort": true
     }
   ]
 }

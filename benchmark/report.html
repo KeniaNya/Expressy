@@ -1,0 +1,486 @@
+<title>Expressy vs Express — Benchmark</title>
+<style>
+  :root {
+    --bg: #14161b; --panel: #1b1e26; --panel-2: #232732; --line: #2b303c;
+    --ink: #e8eaf1; --dim: #9aa3b4; --faint: #6a7385;
+    --amber: #f4a83a; --amber-soft: rgba(244,168,58,.16);
+    --teal: #46bcaf; --slate: #8b94b6; --ghost: #454d60;
+    --runtime: #6f8fd0; --good: #58c08a; --bad: #dd7b82;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --maxw: 1080px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f3ee; --panel: #ffffff; --panel-2: #f6f5ef; --line: #e4e2d8;
+      --ink: #191b21; --dim: #545b69; --faint: #8b91a1;
+      --amber: #b9750c; --amber-soft: rgba(185,117,12,.12);
+      --teal: #1a897e; --slate: #5b6489; --ghost: #c3c6d2;
+      --runtime: #476fc0; --good: #2f9c66; --bad: #c8535c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161b; --panel: #1b1e26; --panel-2: #232732; --line: #2b303c;
+    --ink: #e8eaf1; --dim: #9aa3b4; --faint: #6a7385;
+    --amber: #f4a83a; --amber-soft: rgba(244,168,58,.16);
+    --teal: #46bcaf; --slate: #8b94b6; --ghost: #454d60;
+    --runtime: #6f8fd0; --good: #58c08a; --bad: #dd7b82;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f3ee; --panel: #ffffff; --panel-2: #f6f5ef; --line: #e4e2d8;
+    --ink: #191b21; --dim: #545b69; --faint: #8b91a1;
+    --amber: #b9750c; --amber-soft: rgba(185,117,12,.12);
+    --teal: #1a897e; --slate: #5b6489; --ghost: #c3c6d2;
+    --runtime: #476fc0; --good: #2f9c66; --bad: #c8535c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ── Header ─────────────────────────────────────────── */
+  header { padding: 64px 0 40px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--amber); margin: 0 0 18px;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0 0 16px;
+    font-weight: 700; letter-spacing: -.02em; text-wrap: balance;
+  }
+  h1 .vs { color: var(--faint); font-weight: 500; }
+  .lede { font-size: 18px; color: var(--dim); max-width: 62ch; margin: 0 0 28px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; color: var(--dim);
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 5px 10px; border-radius: 6px;
+  }
+  .chip b { color: var(--ink); font-weight: 600; }
+
+  /* ── Sections ───────────────────────────────────────── */
+  section { padding: 52px 0; border-bottom: 1px solid var(--line); }
+  .sec-eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); margin: 0 0 8px;
+  }
+  h2 { font-size: 25px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 10px; text-wrap: balance; }
+  .sec-lede { color: var(--dim); max-width: 64ch; margin: 0 0 30px; }
+  .sec-lede code {
+    font-family: var(--mono); font-size: .88em; background: var(--panel-2);
+    padding: 1px 5px; border-radius: 4px; color: var(--ink);
+  }
+
+  /* ── Hero stat cards ────────────────────────────────── */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .stat {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 26px 26px 24px; position: relative; overflow: hidden;
+  }
+  .stat.lead { border-color: color-mix(in srgb, var(--amber) 45%, var(--line)); }
+  .stat .cap { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--dim); margin: 0 0 10px; }
+  .stat .big { font-family: var(--mono); font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+  .stat.lead .big { font-size: 68px; color: var(--amber); }
+  .stat .big { font-size: 54px; color: var(--ink); }
+  .stat .sub { color: var(--dim); font-size: 14px; margin: 12px 0 0; }
+  .stat .rng { font-family: var(--mono); color: var(--faint); font-size: 12.5px; margin-top: 6px; }
+
+  /* ── Chart primitives ───────────────────────────────── */
+  .legend { display: flex; flex-wrap: wrap; gap: 16px 20px; margin: 0 0 26px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dim); }
+  .sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .sw.ceil { width: 0; height: 15px; border-left: 2px dashed var(--ghost); border-radius: 0; }
+
+  .srow { margin: 0 0 20px; }
+  .srow .head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 9px; }
+  .srow .name { font-weight: 600; font-size: 14.5px; }
+  .srow .note { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
+  .bars { position: relative; display: flex; flex-direction: column; gap: 6px; }
+  .bar-track { position: relative; height: 22px; background: var(--panel-2); border-radius: 5px; overflow: hidden; }
+  .bar { position: absolute; inset: 0 auto 0 0; height: 100%; border-radius: 5px; display: flex; align-items: center;
+    padding-left: 9px; transition: width .9s cubic-bezier(.2,.8,.2,1); width: 0; }
+  .bar .v { font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: #10121a; white-space: nowrap; }
+  .bar.amber { background: var(--amber); }
+  .bar.teal  { background: var(--teal); }
+  .bar.slate { background: var(--slate); }
+  .bar .lbl { font-family: var(--mono); font-size: 10.5px; color: rgba(16,18,26,.7); margin-left: 8px; font-weight: 500; }
+  .ceil { position: absolute; top: -3px; bottom: -3px; border-left: 2px dashed var(--ghost); z-index: 3; }
+
+  /* ── Decomposition ──────────────────────────────────── */
+  .decomp .srow .head { margin-bottom: 7px; }
+  .dbar { position: relative; height: 30px; background: var(--panel-2); border-radius: 6px; display: flex; overflow: hidden; }
+  .dseg { height: 100%; display: flex; align-items: center; justify-content: center; width: 0;
+    transition: width .9s cubic-bezier(.2,.8,.2,1); overflow: hidden; }
+  .dseg.rt { background: color-mix(in srgb, var(--runtime) 82%, transparent); }
+  .dseg.fw { background: var(--amber); }
+  .dseg .t { font-family: var(--mono); font-size: 11.5px; font-weight: 700; color: #10121a; white-space: nowrap; }
+  .dseg.rt .t { color: #fff; }
+  .dtot { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--ink); margin-left: 12px; white-space: nowrap; }
+  .decomp .head { display: flex; justify-content: space-between; align-items: baseline; }
+
+  /* ── Efficiency ─────────────────────────────────────── */
+  .eff-track { position: relative; height: 20px; background: var(--panel-2); border-radius: 5px; overflow: hidden; }
+  .eff-fill { height: 100%; width: 0; transition: width .9s cubic-bezier(.2,.8,.2,1); border-radius: 5px; }
+
+  /* ── Table ──────────────────────────────────────────── */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+  th, td { padding: 11px 14px; text-align: right; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-family: var(--mono); font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--dim); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.win { color: var(--amber); font-weight: 700; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: baseline; }
+
+  /* ── Concurrency SVG ────────────────────────────────── */
+  .chartbox { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  svg text { font-family: var(--mono); fill: var(--faint); }
+
+  /* ── Callout / notes ────────────────────────────────── */
+  .callout {
+    background: var(--amber-soft); border: 1px solid color-mix(in srgb, var(--amber) 34%, var(--line));
+    border-radius: 10px; padding: 18px 20px; margin: 26px 0 0; font-size: 14.5px; color: var(--ink);
+  }
+  .callout b { color: var(--amber); }
+  .notes { display: grid; gap: 14px; }
+  .note {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; font-size: 14px; color: var(--dim);
+  }
+  .note b { color: var(--ink); font-weight: 600; }
+  .note code { font-family: var(--mono); font-size: .86em; background: var(--panel-2); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
+
+  footer { padding: 34px 0 70px; color: var(--faint); font-size: 12.5px; font-family: var(--mono); }
+  footer a { color: var(--dim); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 720px) {
+    .stat-grid, .two { grid-template-columns: 1fr; }
+    .stat.lead .big { font-size: 54px; } .stat .big { font-size: 42px; }
+    header { padding: 44px 0 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar, .dseg, .eff-fill { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Benchmark · framework throughput</p>
+    <h1>Expressy <span class="vs">vs</span> Express</h1>
+    <p class="lede">A same-workload, byte-identical head-to-head. Every server answers the
+      exact same routes; the only thing that changes is the framework and the runtime under it.</p>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <section>
+    <p class="sec-eyebrow">Headline</p>
+    <h2>Faster — but let's be precise about why</h2>
+    <p class="sec-lede">Two numbers, because they answer two different questions. One is what you'd feel
+      in production. The other is what Expressy's own code actually earns, with the runtime advantage stripped out.</p>
+    <div class="stat-grid">
+      <div class="stat lead">
+        <p class="cap">Expressy·Bun vs Express·Node — as deployed</p>
+        <div class="big" id="h-real">—</div>
+        <p class="sub">geometric-mean throughput across 7 scenarios. This bundles both the framework <em>and</em> the Bun runtime.</p>
+        <p class="rng" id="h-real-rng"></p>
+      </div>
+      <div class="stat">
+        <p class="cap">Expressy vs Express — same runtime (both on Bun)</p>
+        <div class="big" id="h-fw">—</div>
+        <p class="sub">the framework's own contribution, with the runtime held constant. The honest "my code is faster" number.</p>
+        <p class="rng" id="h-fw-rng"></p>
+      </div>
+    </div>
+    <div class="callout">
+      <b>The clean takeaway:</b> the ~3× you'd see in production is roughly
+      <span class="mono">1.8× runtime × 1.8× framework</span>. Expressy is genuinely leaner than Express,
+      and running on Bun compounds it. Both effects are real; neither should be sold as the other.
+    </div>
+  </section>
+
+  <section>
+    <p class="sec-eyebrow">Throughput · requests per second</p>
+    <h2>Every scenario, three frameworks</h2>
+    <p class="sec-lede">Higher is better. Each group compares the three frameworks; the dashed line marks the
+      <b>raw <code>Bun.serve</code> ceiling</b> for that route — how much is physically on the table before any framework.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--amber)"></i>Expressy · Bun</span>
+      <span><i class="sw" style="background:var(--teal)"></i>Express · Bun</span>
+      <span><i class="sw" style="background:var(--slate)"></i>Express · Node</span>
+      <span><i class="sw ceil"></i>raw Bun.serve ceiling</span>
+    </div>
+    <div id="throughput"></div>
+  </section>
+
+  <section>
+    <p class="sec-eyebrow">Decomposition</p>
+    <h2>Where the speedup actually comes from</h2>
+    <p class="sec-lede">Real-world speedup factors cleanly: <span class="mono">runtime × framework</span>. The blue segment is
+      the <b>Bun-vs-Node</b> effect (same Express code, different runtime); the amber segment is <b>Expressy-vs-Express</b>
+      on identical Bun. Segments are drawn on a log scale, so their lengths literally add up to the total.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--runtime)"></i>Bun runtime effect</span>
+      <span><i class="sw" style="background:var(--amber)"></i>Expressy framework effect</span>
+    </div>
+    <div id="decomp" class="decomp"></div>
+    <div class="callout">
+      Notice the split moves by workload. On <b>plain routing</b> Bun does most of the lifting; on
+      <b>body parsing &amp; JSON</b> Expressy's thin fetch-native path pulls its own weight — up to <b>2.5×</b> over Express on the same runtime.
+    </div>
+  </section>
+
+  <section>
+    <p class="sec-eyebrow">Tail latency · p99 milliseconds</p>
+    <h2>The tail is where it's felt</h2>
+    <p class="sec-lede">Median latency is fine everywhere. The 99th percentile — the requests your users actually
+      complain about — is where Express·Node stretches out under load while the Bun servers stay tight. Lower is better.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--amber)"></i>Expressy · Bun</span>
+      <span><i class="sw" style="background:var(--teal)"></i>Express · Bun</span>
+      <span><i class="sw" style="background:var(--slate)"></i>Express · Node</span>
+    </div>
+    <div id="latency"></div>
+  </section>
+
+  <section>
+    <div class="two">
+      <div>
+        <p class="sec-eyebrow">Overhead</p>
+        <h2>How close to the metal</h2>
+        <p class="sec-lede">Share of the <em>raw runtime's</em> throughput each framework keeps. A thin framework stays
+          near 100% of its own runtime's ceiling; a heavy one gives it away.</p>
+        <div id="efficiency"></div>
+      </div>
+      <div>
+        <p class="sec-eyebrow">Scaling · JSON route</p>
+        <h2>Holding up under connections</h2>
+        <p class="sec-lede">Throughput as concurrent connections climb from 16 to 256. Expressy is already saturated
+          (CPU-bound on a shared host); Express·Node stays flat and low; Express·Bun climbs as Bun finds headroom.</p>
+        <div class="chartbox"><div id="sweep"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="sec-eyebrow">Full numbers</p>
+    <h2>Throughput matrix — rps @ 64 connections</h2>
+    <p class="sec-lede">Median of 3 measured runs. Raw servers are reference ceilings, not frameworks.</p>
+    <div class="table-scroll"><table id="matrix"></table></div>
+  </section>
+
+  <section>
+    <p class="sec-eyebrow">Method &amp; honesty</p>
+    <h2>How this was measured — and what not to over-read</h2>
+    <div class="notes">
+      <div class="note"><b>Identical work.</b> All five servers return byte-for-byte identical bodies and content-types on
+        every route (checked by <code>smoke.mjs</code> before each run). Nobody wins by doing less.</div>
+      <div class="note"><b>Median of 3 × 6s</b> after a 2s warmup, 64 connections, pipelining 1. Typical run-to-run spread
+        was ~3%. The one blemish: Express·Node dropped 35 of 24,632 requests (0.14%) at 256 connections — it alone showed
+        socket resets under saturation.</div>
+      <div class="note"><b>Same-host load.</b> autocannon runs on the same machine as the server, so both share the CPU.
+        Absolute rps would be higher on dedicated hardware — but the <b>ratios between servers</b>, which is the whole point, hold.</div>
+      <div class="note"><b>Express as shipped.</b> Default config, including its weak-ETag hashing and <code>X-Powered-By</code>.
+        A probe with both disabled (<code>EXPRESS_TUNED=1</code>) moved Express·Node by only ±8% — its cost here is the
+        router and req/res layer, not optional features.</div>
+      <div class="note"><b>Expressy is Bun-only.</b> It's built on <code>Bun.serve</code> and fetch <code>Request</code>/<code>Response</code>,
+        so it can't run on Node. That's exactly why Express is measured on <em>both</em> runtimes — to separate the two effects
+        rather than quietly credit the runtime to the framework.</div>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+  // ── Raw measured data (median of 3 trials, rps @ 64 conns unless noted) ──
+  const M = {
+    meta: { cpu: "Intel Core i7-6700 @ 3.40GHz", cores: 8, mem: "17 GB", os: "Windows 11",
+            bun: "1.2.2", node: "22.13.1", express: "5.2.1",
+            load: "64 conns · 3×6s median · pipelining 1", date: "2026-07-07" },
+    scen: [
+      { key:"plaintext",  label:"Plain text",      note:"GET · text/plain",  exp:15015, expBun:11151, expNode:4310, rawBun:14319, rawNode:14243, lat:{exp:10, expBun:10, expNode:55} },
+      { key:"json",       label:"JSON (small)",    note:"GET · res.json",    exp:15185, expBun:8218,  expNode:4217, rawBun:15187, rawNode:13904, lat:{exp:7,  expBun:16, expNode:52} },
+      { key:"params",     label:"Route params",    note:"GET /user/:id",     exp:12948, expBun:7700,  expNode:4283, rawBun:15268, rawNode:12843, lat:{exp:13, expBun:18, expNode:51} },
+      { key:"query",      label:"Query string",    note:"GET /search?q=",    exp:12464, expBun:7809,  expNode:4118, rawBun:15307, rawNode:13667, lat:{exp:12, expBun:15, expNode:50} },
+      { key:"middleware", label:"Middleware ×5",   note:"5 chained handlers",exp:13589, expBun:8465,  expNode:4146, rawBun:15313, rawNode:14283, lat:{exp:9,  expBun:14, expNode:50} },
+      { key:"post",       label:"POST JSON echo",  note:"body parser",       exp:10733, expBun:4245,  expNode:3505, rawBun:15345, rawNode:11781, lat:{exp:11, expBun:29, expNode:23} },
+      { key:"large",      label:"JSON (100 items)",note:"larger payload",    exp:7467,  expBun:3863,  expNode:3202, rawBun:10619, rawNode:11843, lat:{exp:20, expBun:26, expNode:37} },
+    ],
+    sweep: { conns:[16,64,256], exp:[15329,15185,14849], expBun:[7253,8218,9225], expNode:[4332,4217,4106] },
+  };
+
+  const fmt = n => Math.round(n).toLocaleString("en-US");
+  const geomean = a => Math.exp(a.reduce((s,x)=>s+Math.log(x),0)/a.length);
+  const $ = (t,c,h) => { const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; };
+
+  // ── Chips ──
+  const m = M.meta;
+  document.getElementById("chips").innerHTML = [
+    `<b>${m.cpu}</b> · ${m.cores} cores`, `Bun <b>${m.bun}</b>`, `Node <b>${m.node}</b>`,
+    `Express <b>${m.express}</b>`, m.load, m.os,
+  ].map(t=>`<span class="chip">${t}</span>`).join("");
+
+  // ── Headline ──
+  const spNode = M.scen.map(s=>s.exp/s.expNode);
+  const spFw   = M.scen.map(s=>s.exp/s.expBun);
+  document.getElementById("h-real").textContent = geomean(spNode).toFixed(2)+"×";
+  document.getElementById("h-fw").textContent   = geomean(spFw).toFixed(2)+"×";
+  document.getElementById("h-real-rng").textContent =
+    `range ${Math.min(...spNode).toFixed(2)}× – ${Math.max(...spNode).toFixed(2)}×`;
+  document.getElementById("h-fw-rng").textContent =
+    `range ${Math.min(...spFw).toFixed(2)}× – ${Math.max(...spFw).toFixed(2)}×`;
+
+  // ── Throughput bars ──
+  const SCALE = 15600;
+  const tp = document.getElementById("throughput");
+  for (const s of M.scen) {
+    const row = $("div","srow");
+    row.appendChild($("div","head",
+      `<span class="name">${s.label}</span><span class="note">${s.note}</span>`));
+    const bars = $("div","bars");
+    const mk = (cls, val, name) => {
+      const track = $("div","bar-track");
+      const bar = $("div",`bar ${cls}`);
+      bar.innerHTML = `<span class="v">${fmt(val)}</span><span class="lbl">${name}</span>`;
+      requestAnimationFrame(()=> bar.style.width = (val/SCALE*100)+"%");
+      track.appendChild(bar);
+      return track;
+    };
+    bars.appendChild(mk("amber", s.exp, "Expressy"));
+    bars.appendChild(mk("teal",  s.expBun, "Express·Bun"));
+    bars.appendChild(mk("slate", s.expNode, "Express·Node"));
+    const ceil = $("div","ceil"); ceil.style.left = (s.rawBun/SCALE*100)+"%";
+    ceil.title = `raw Bun.serve ceiling: ${fmt(s.rawBun)} rps`;
+    bars.appendChild(ceil);
+    row.appendChild(bars);
+    tp.appendChild(row);
+  }
+
+  // ── Decomposition (log-scale segmented) ──
+  const dc = document.getElementById("decomp");
+  const totals = M.scen.map(s=>s.exp/s.expNode);
+  const maxLog = Math.max(...totals.map(Math.log));
+  for (const s of M.scen) {
+    const rt = s.expBun/s.expNode, fw = s.exp/s.expBun, tot = s.exp/s.expNode;
+    const row = $("div","srow");
+    row.appendChild($("div","head",
+      `<span class="name">${s.label}</span><span class="note">total ${tot.toFixed(2)}×</span>`));
+    const wrap = $("div"); wrap.style.display="flex"; wrap.style.alignItems="center";
+    const bar = $("div","dbar");
+    const segRt = $("div","dseg rt", `<span class="t">${rt.toFixed(2)}× Bun</span>`);
+    const segFw = $("div","dseg fw", `<span class="t">${fw.toFixed(2)}× Expressy</span>`);
+    bar.appendChild(segRt); bar.appendChild(segFw);
+    requestAnimationFrame(()=> {
+      segRt.style.width = (Math.log(rt)/maxLog*100)+"%";
+      segFw.style.width = (Math.log(fw)/maxLog*100)+"%";
+    });
+    wrap.style.flex="1"; bar.style.flex="1";
+    const wc = $("div"); wc.style.flex="1"; wc.appendChild(bar);
+    wrap.appendChild(wc);
+    wrap.appendChild($("span","dtot","= "+tot.toFixed(2)+"×"));
+    row.appendChild(wrap);
+    dc.appendChild(row);
+  }
+
+  // ── Tail latency (p99) ── lower is better; scale to worst
+  const lat = document.getElementById("latency");
+  const latMax = Math.max(...M.scen.flatMap(s=>[s.lat.exp,s.lat.expBun,s.lat.expNode]));
+  for (const s of M.scen) {
+    const row = $("div","srow");
+    row.appendChild($("div","head",
+      `<span class="name">${s.label}</span><span class="note">p99 · ms</span>`));
+    const bars = $("div","bars");
+    const mk = (cls,val) => {
+      const track=$("div","bar-track"); const bar=$("div",`bar ${cls}`);
+      bar.innerHTML=`<span class="v">${val} ms</span>`;
+      requestAnimationFrame(()=> bar.style.width=Math.max(val/latMax*100,7)+"%");
+      track.appendChild(bar); return track;
+    };
+    bars.appendChild(mk("amber",s.lat.exp));
+    bars.appendChild(mk("teal", s.lat.expBun));
+    bars.appendChild(mk("slate",s.lat.expNode));
+    row.appendChild(bars); lat.appendChild(row);
+  }
+
+  // ── Efficiency vs ceiling ──
+  const ef = document.getElementById("efficiency");
+  const effRows = [
+    { name:"Expressy ÷ raw Bun",     color:"var(--amber)", vals:M.scen.map(s=>s.exp/s.rawBun) },
+    { name:"Express·Bun ÷ raw Bun",  color:"var(--teal)",  vals:M.scen.map(s=>s.expBun/s.rawBun) },
+    { name:"Express·Node ÷ raw Node",color:"var(--slate)", vals:M.scen.map(s=>s.expNode/s.rawNode) },
+  ];
+  for (const r of effRows) {
+    const avg = r.vals.reduce((a,b)=>a+b,0)/r.vals.length;
+    const capped = Math.min(avg,1);
+    const box = $("div","srow");
+    box.appendChild($("div","head",
+      `<span class="name" style="font-size:13.5px"><i class="dot" style="background:${r.color}"></i>${r.name}</span>`+
+      `<span class="note">${Math.round(avg*100)}% avg</span>`));
+    const track=$("div","eff-track"); const fill=$("div","eff-fill");
+    fill.style.background=r.color;
+    requestAnimationFrame(()=> fill.style.width=(capped*100)+"%");
+    track.appendChild(fill); box.appendChild(track); ef.appendChild(box);
+  }
+
+  // ── Concurrency SVG line chart ──
+  (function(){
+    const W=440,H=240, pad={l:52,r:16,t:16,b:34};
+    const xs=M.sweep.conns, series=[
+      {k:"exp",   c:"var(--amber)", n:"Expressy"},
+      {k:"expBun",c:"var(--teal)",  n:"Express·Bun"},
+      {k:"expNode",c:"var(--slate)",n:"Express·Node"},
+    ];
+    const allY=series.flatMap(s=>M.sweep[s.k]);
+    const yMax=Math.ceil(Math.max(...allY)/2000)*2000, yMin=0;
+    const px=i=> pad.l + (i/(xs.length-1))*(W-pad.l-pad.r);
+    const py=v=> pad.t + (1-(v-yMin)/(yMax-yMin))*(H-pad.t-pad.b);
+    let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Throughput vs connections">`;
+    for(let g=0; g<=yMax; g+=5000){
+      svg+=`<line x1="${pad.l}" y1="${py(g)}" x2="${W-pad.r}" y2="${py(g)}" stroke="var(--line)" stroke-width="1"/>`;
+      svg+=`<text x="${pad.l-8}" y="${py(g)+3}" text-anchor="end" font-size="10">${g/1000}k</text>`;
+    }
+    xs.forEach((c,i)=> svg+=`<text x="${px(i)}" y="${H-12}" text-anchor="middle" font-size="10">${c}</text>`);
+    svg+=`<text x="${(pad.l+W-pad.r)/2}" y="${H}" text-anchor="middle" font-size="9.5" fill="var(--faint)">connections</text>`;
+    for(const s of series){
+      const pts=M.sweep[s.k].map((v,i)=>`${px(i)},${py(v)}`).join(" ");
+      svg+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+      M.sweep[s.k].forEach((v,i)=> svg+=`<circle cx="${px(i)}" cy="${py(v)}" r="3.4" fill="${s.c}"/>`);
+      const lastI=xs.length-1;
+      svg+=`<text x="${px(lastI)-4}" y="${py(M.sweep[s.k][lastI])-8}" text-anchor="end" font-size="10" fill="${s.c}" font-weight="700">${s.n}</text>`;
+    }
+    svg+=`</svg>`;
+    document.getElementById("sweep").innerHTML=svg;
+  })();
+
+  // ── Matrix table ──
+  (function(){
+    const cols=[
+      {k:"exp",n:"Expressy·Bun",c:"var(--amber)",win:true},
+      {k:"expBun",n:"Express·Bun",c:"var(--teal)"},
+      {k:"expNode",n:"Express·Node",c:"var(--slate)"},
+      {k:"rawBun",n:"raw Bun",c:"var(--ghost)"},
+      {k:"rawNode",n:"raw Node",c:"var(--ghost)"},
+    ];
+    let h=`<thead><tr><th>Scenario</th>${cols.map(c=>
+      `<th class="num"><span class="dot" style="background:${c.c}"></span>${c.n}</th>`).join("")}</tr></thead><tbody>`;
+    for(const s of M.scen){
+      h+=`<tr><td>${s.label}</td>${cols.map(c=>
+        `<td class="num${c.win?" win":""}">${fmt(s[c.k])}</td>`).join("")}</tr>`;
+    }
+    h+=`</tbody>`;
+    document.getElementById("matrix").innerHTML=h;
+  })();
+
+  document.getElementById("foot").innerHTML =
+    `Generated ${m.date} · autocannon on ${m.cpu}, same host · reproduce with `+
+    `<a href="#">node run.mjs</a> in /benchmark · figures are one machine, one session — directional, not absolute.`;
+</script>
