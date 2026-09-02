@@ -1,17 +1,4 @@
-const STATUS_TEXT: Record<number, string> = {
-  400: "Bad Request",
-  401: "Unauthorized",
-  403: "Forbidden",
-  404: "Not Found",
-  405: "Method Not Allowed",
-  409: "Conflict",
-  413: "Payload Too Large",
-  422: "Unprocessable Entity",
-  429: "Too Many Requests",
-  500: "Internal Server Error",
-  501: "Not Implemented",
-  503: "Service Unavailable",
-};
+import { STATUS_CODES } from "node:http";
 
 /**
  * Throw (or `next()`) one of these from any handler and the default error
@@ -21,10 +8,16 @@ const STATUS_TEXT: Record<number, string> = {
  */
 export class HttpError extends Error {
   readonly status: number;
+  /** Express-style alias for `status`. */
+  readonly statusCode: number;
+  /** True for 4xx errors: safe to show the message to the client. */
+  readonly expose: boolean;
 
   constructor(status: number, message?: string) {
-    super(message ?? STATUS_TEXT[status] ?? `HTTP Error ${status}`);
+    super(message ?? STATUS_CODES[status] ?? `HTTP Error ${status}`);
     this.name = "HttpError";
     this.status = status;
+    this.statusCode = status;
+    this.expose = status < 500;
   }
 }

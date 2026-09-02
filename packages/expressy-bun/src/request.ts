@@ -22,9 +22,7 @@ export class ExpressyRequest {
   baseUrl = "";
   /** Route params, e.g. `/users/:id` -> `{ id: "42" }`. */
   params: Record<string, string> = {};
-  /** Parsed query string. Repeated keys become arrays. */
-  readonly query: Record<string, string | string[]>;
-  /** Populated by the `json()` / `urlencoded()` body-parser middleware. */
+  /** Populated by the `json()` / `urlencoded()` / `text()` / `raw()` body parsers. */
   body: unknown = undefined;
   /** The application handling this request. */
   app?: App;
@@ -38,6 +36,7 @@ export class ExpressyRequest {
 
   private server?: Server<unknown>;
   private cachedText?: Promise<string>;
+  private cachedQuery?: Record<string, string | string[]>;
   private cachedHeaders?: Record<string, string>;
   private cachedCookies?: Record<string, string>;
 
@@ -48,7 +47,11 @@ export class ExpressyRequest {
     this.parsedUrl = new URL(raw.url);
     this.path = this.parsedUrl.pathname;
     this.originalUrl = this.parsedUrl.pathname + this.parsedUrl.search;
+  }
 
+  /** Parsed query string. Repeated keys become arrays. Parsed lazily on first access. */
+  get query(): Record<string, string | string[]> {
+    if (this.cachedQuery) return this.cachedQuery;
     const query: Record<string, string | string[]> = {};
     for (const [key, value] of this.parsedUrl.searchParams) {
       const existing = query[key];
@@ -56,7 +59,7 @@ export class ExpressyRequest {
       else if (Array.isArray(existing)) existing.push(value);
       else query[key] = [existing, value];
     }
-    this.query = query;
+    return (this.cachedQuery = query);
   }
 
   /**
@@ -76,6 +79,11 @@ export class ExpressyRequest {
   /** Mount-relative path + query string, like Express's `req.url`. */
   get url(): string {
     return this.path + this.parsedUrl.search;
+  }
+
+  /** True when the request was made with `X-Requested-With: XMLHttpRequest`. */
+  get xhr(): boolean {
+    return (this.raw.headers.get("x-requested-with") ?? "").toLowerCase() === "xmlhttprequest";
   }
 
   private get trustProxy(): unknown {
@@ -139,6 +147,11 @@ export class ExpressyRequest {
   text(): Promise<string> {
     this.cachedText ??= this.raw.text();
     return this.cachedText;
+  }
+
+  /** @internal Seeds the text cache after a body parser consumed the stream itself. */
+  _primeText(text: string): void {
+    this.cachedText = Promise.resolve(text);
   }
 
   /** Read and parse the body as JSON. */

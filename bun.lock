@@ -1,10 +1,12 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "expressy-workspace",
       "devDependencies": {
         "@types/bun": "latest",
+        "nunjucks": "^3.2.4",
       },
     },
     "demo": {
@@ -15,10 +17,7 @@
     },
     "packages/expressy-bun": {
       "name": "expressy-bun",
-      "version": "0.1.0",
-      "devDependencies": {
-        "nunjucks": "^3.2.4",
-      },
+      "version": "0.3.0",
     },
   },
   "packages": {

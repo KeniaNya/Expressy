@@ -13,20 +13,25 @@ These behave the same as Express, same signatures, same semantics:
 | Feature | Notes |
 |---|---|
 | `app.get/post/put/patch/delete/head/options/all(path, ...handlers)` | Multiple handlers per route work |
+| Path arrays, optional params, RegExp paths | `app.get(["/a", "/b"], h)`, `/user/:id?`, `app.get(/^\/ab?c/, h)` (captures → `req.params[0]`) |
+| `app.route("/x").get(...).post(...)` | Same chainable shape |
+| Case-insensitive, trailing-slash-tolerant matching | Same defaults; `case sensitive routing` / `strict routing` settings and `Router({ caseSensitive, strict })` opt out |
 | Middleware: `app.use(fn)`, `app.use("/prefix", fn)` | Prefix mounting strips the path for the mounted handler, like Express |
-| `next()` / `next(err)` | Same chaining model |
+| `next()` / `next(err)` / `next("route")` / `next("router")` | Same chaining and control-flow model |
 | Error handlers = functions with **4 parameters** | Same arity-based detection as Express |
 | Routers: `router.get(...)`, `app.use("/api", router)` | Mount-path params merge into `req.params` (`/users/:userId` + router `/:postId`) |
 | Sub-apps: `app.use("/admin", otherApp)` | An `App` is a `Router` |
 | Route params: `/users/:id` → `req.params.id` | URL-decoded, same as Express |
 | `req.query` | Flat keys; repeated keys become arrays (see [query differences](#query-strings)) |
-| `req.body` via body-parser middleware | `json()` / `urlencoded()` instead of `express.json()` / `express.urlencoded()` |
-| `req.method`, `req.headers`, `req.get(name)`, `req.hostname`, `req.protocol`, `req.secure`, `req.ip`, `req.originalUrl`, `req.url`, `req.path`, `req.baseUrl` | `req.headers` is a plain lowercase-keyed object, like Node/Express |
+| `req.body` via body-parser middleware | `json()` / `urlencoded()` / `text()` / `raw()`, same options (`limit`, `extended`, `strict`, `type`); empty JSON body → `{}` |
+| `req.method`, `req.headers`, `req.get(name)`, `req.hostname`, `req.protocol`, `req.secure`, `req.ip`, `req.xhr`, `req.originalUrl`, `req.url`, `req.path`, `req.baseUrl` | `req.headers` is a plain lowercase-keyed object, like Node/Express |
 | `req.cookies` | Parsed from the `Cookie` header automatically |
 | `req.session` / `req.sessionID` | Built-in `session()` middleware with the express-session API (see below) |
 | `app.set()` / `app.get(name)` / `app.enable()` / `app.disable()` | Including `trust proxy` (X-Forwarded-For/-Proto/-Host, numeric hop counts) |
-| `express.Router()`, `express.json()`, `express.urlencoded()`, `express.static()` | Same call shapes on the default export: `expressy.Router()`, `expressy.json({ limit: "2mb" })`, ... |
-| `res.status(code)`, `res.set()`, `res.get()`, `res.append()`, `res.type()` | Chainable, same as Express; Node-style `res.setHeader()`/`getHeader()`/`removeHeader()` too |
+| `express.Router()`, `express.json()`, `express.urlencoded()`, `express.text()`, `express.raw()`, `express.static()` | Same call shapes on the default export: `expressy.Router()`, `expressy.json({ limit: "2mb" })`, ... |
+| `express.static(dir, { maxAge, immutable, etag, lastModified, dotfiles, index, setHeaders })` | Same options; sends `ETag` / `Last-Modified` / `Cache-Control` and answers conditional requests with 304 |
+| `res.status(code)`, `res.set()`/`res.header()`, `res.get()`, `res.append()`, `res.type()`, `res.vary()`, `res.location()` | Chainable, same as Express; Node-style `res.setHeader()`/`getHeader()`/`removeHeader()` too |
+| `res.attachment()`, `res.download()`, `res.sendFile(path, { root })` | `sendFile`/`download` are `async` — `await` or `return` them |
 | `res.json(obj)`, `res.send(body)`, `res.end()`, `res.sendStatus(code)` | `send()` does the same type sniffing: string→HTML, object→JSON, Buffer→octet-stream |
 | `res.redirect(...)` | Accepts **both** `(url, status?)` and Express's `(status, url)` |
 | `res.render(view, locals)`, `res.locals`, `app.locals`, `app.engine()`, `view engine`/`views` settings | Engines using Express's View-class hook (nunjucks `express:` option) work unchanged |
@@ -128,20 +133,16 @@ app.use((req, res, next) => {
 
 | Express | Expressy |
 |---|---|
-| RegExp paths: `app.get(/^\/ab?c/)` | ❌ strings only (`:param` and `*`) |
-| Path arrays: `app.get(["/a", "/b"], h)` | ❌ register twice |
-| Optional params: `/user/:id?` | ❌ register both routes |
-| `next("route")` / `next("router")` | ❌ **any truthy argument to `next()` is treated as an error** — this is a silent behavior change, check your code for it |
 | `app.param("id", fn)` | ❌ use middleware |
-| `app.route("/x").get(...).post(...)` | ❌ register per method |
+| Custom regex per param (`/:id(\\d+)`), `+`/`(...)` groups in string paths | ❌ use a `RegExp` path instead |
 
 ### Request / response API gaps
 
-- `req.accepts()`, `req.acceptsLanguages()`, `req.fresh`, `req.stale`, `req.range`, `req.xhr`, `req.subdomains` — no content negotiation helpers. `req.is()` exists; check `req.headers.accept` yourself.
+- `req.accepts()`, `req.acceptsLanguages()`, `req.fresh`, `req.stale`, `req.range`, `req.subdomains` — no content negotiation helpers. `req.is()` exists; check `req.headers.accept` yourself.
 - `req.route` — not exposed.
 - `req.signedCookies` — the session cookie is signed, but there is no general signed-cookie API.
-- `res.format()`, `res.attachment()`, `res.download()`, `res.vary()`, `res.links()`, `res.jsonp()` — not implemented.
-- `res.sendFile(path)` — exists but is `async` (call it with `await` or `return`) and resolves relative paths from the working directory; there is no `{ root }` option.
+- `res.format()`, `res.links()`, `res.jsonp()` — not implemented.
+- `res.sendFile()` / `res.download()` — exist but are `async` (call them with `await` or `return`); `{ root, headers }` are the supported options.
 
 ### Query strings
 

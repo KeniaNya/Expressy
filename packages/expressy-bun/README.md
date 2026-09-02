@@ -26,13 +26,13 @@ Coming from Express? Read **[MIGRATION.md](MIGRATION.md)** — an honest breakdo
 
 ## Features
 
-- **Express-style routing** — `app.get/post/put/patch/delete/head/options/all(path, ...handlers)`
-- **Route params & wildcards** — `/users/:id`, `/files/*` (captured as `req.params["*"]`)
-- **Middleware with `next()`** — including path-scoped mounts and Express-style 4-arity error handlers
+- **Express-style routing** — `app.get/post/put/patch/delete/head/options/all(path, ...handlers)`, `app.route(path)`, path arrays, `RegExp` paths, case-insensitive by default
+- **Route params & wildcards** — `/users/:id`, optional `/users/:id?`, `/files/*` (captured as `req.params["*"]`)
+- **Middleware with `next()`** — including path-scoped mounts, `next("route")` / `next("router")`, and Express-style 4-arity error handlers
 - **Mountable routers** — `app.use("/api/notes", router)`, with mount-path params merging (`/users/:userId/posts` + `/:postId`)
 - **Async everywhere** — `async` handlers just work; rejections flow into your error middleware
-- **Body parsers** — `json()` and `urlencoded()` built in, with `limit` and qs-style `extended` options
-- **Static files** — `serveStatic(dir)` using `Bun.file` (zero-copy sendfile, automatic MIME types)
+- **Body parsers** — `json()`, `urlencoded()`, `text()` and `raw()` built in, with `limit` (enforced while streaming) and qs-style `extended` options
+- **Static files** — `serveStatic(dir)` using `Bun.file` (zero-copy sendfile, automatic MIME types), with `ETag` / `Last-Modified` / 304 and `Cache-Control`
 - **Native sessions** — `session()` with the express-session API (signed cookies, stores, `regenerate`/`save`/`destroy`)
 - **View engines** — `app.engine()`, `app.set("view engine", ...)`, `res.render()` with `app.locals`/`res.locals`; nunjucks's `express:` option works out of the box
 - **Settings** — `app.set`/`app.get`/`enable`/`disable`, including `trust proxy` (X-Forwarded-For/-Proto/-Host)
@@ -60,12 +60,21 @@ await app.fetch(new Request("http://x/"));   // perfect for tests
 app.get("/notes/:id", (req, res) => { ... });
 app.post("/notes", validate, create);        // multiple handlers per route
 app.all("/anything", handler);               // every method
+app.get("/users/:id?", handler);             // optional param
+app.get(["/a", "/b"], handler);              // path arrays
+app.get(/^\/files\/(\d+)$/, handler);        // RegExp → req.params[0]
+app.route("/book").get(show).post(create);   // chainable per path
 
-const api = new Router();
+const api = new Router();                    // new Router({ caseSensitive: true, strict: true })
 api.get("/", list);
 api.get("/:id", show);
 app.use("/api/notes", api);                  // api sees paths relative to the mount
 ```
+
+Paths match case-insensitively and tolerate a trailing slash, like Express;
+`app.enable("case sensitive routing")` / `app.enable("strict routing")` opt out.
+Inside a route, `next("route")` skips to the next matching route and
+`next("router")` leaves the current router.
 
 ### Request
 
@@ -73,13 +82,13 @@ app.use("/api/notes", api);                  // api sees paths relative to the m
 |---|---|
 | `req.params` | Route params (`:id`, `*`) — URL-decoded |
 | `req.query` | Parsed query string; repeated keys become arrays |
-| `req.body` | Set by `json()` / `urlencoded()` middleware |
+| `req.body` | Set by `json()` / `urlencoded()` / `text()` / `raw()` middleware |
 | `req.path`, `req.originalUrl`, `req.url`, `req.baseUrl` | Current (mount-relative) path / original path+query / mount prefix |
 | `req.method`, `req.headers`, `req.get(name)` | `req.headers` is a plain lowercase-keyed object, like Node/Express |
 | `req.cookies` | Parsed `Cookie` header |
 | `req.session`, `req.sessionID` | Set by the `session()` middleware |
 | `req.hostname`, `req.protocol`, `req.secure`, `req.ip` | Connection info; honors the `trust proxy` setting |
-| `req.is("json")` | Content-Type check |
+| `req.is("json")`, `req.xhr` | Content-Type check / `X-Requested-With` check |
 | `await req.json()` / `req.text()` / `req.formData()` | Manual body reading (text/json are cached) |
 | `req.raw` | The untouched fetch `Request` |
 
@@ -89,13 +98,17 @@ app.use("/api/notes", api);                  // api sees paths relative to the m
 res.status(201).json({ ok: true });
 res.send("<h1>html</h1>");        // strings → text/html, objects → JSON, Blob/BunFile pass through
 res.text("plain"); res.html("<b>hi</b>");
-res.set("X-Powered-By", "expressy").type("json");
+res.set("X-Powered-By", "expressy").type("json");   // type() takes "json", ".png" or a MIME
 res.setHeader("Content-Disposition", "attachment");  // Node-style aliases too
+res.vary("Accept").location("/next");
 res.redirect("/login");           // both (url, status) and Express's (status, url) work
 res.sendStatus(404);              // "Not Found"
 res.render("perfil", { user });   // via app.engine / view engine setting
-await res.sendFile("./report.pdf");
-res.cookie("session", token, { httpOnly: true, sameSite: "Lax" });
+await res.sendFile("report.pdf", { root: "./files" });
+await res.download("./files/report.pdf", "informe.pdf");  // Content-Disposition: attachment
+res.attachment("data.csv");       // just the headers, then send the body yourself
+res.cookie("session", token, { httpOnly: true, sameSite: "Lax", maxAge: 3_600_000 });
+res.clearCookie("session");
 res.locals.user = currentUser;    // per-request template locals
 res.onFinish((res) => log(res.statusCode));  // fires after the response is sent
 res.end();                        // empty body
@@ -143,11 +156,17 @@ e.g. `nunjucks.configure("views", { express: app })`.
 ### Middleware & error handling
 
 ```ts
-import expressy, { json, urlencoded, serveStatic, HttpError } from "expressy-bun";
+import expressy, { json, urlencoded, text, raw, serveStatic, HttpError } from "expressy-bun";
 
-app.use(json());                       // req.body for application/json
+app.use(json({ limit: "1mb" }));       // req.body for application/json ({} when empty; strict by default)
 app.use(urlencoded());                 // req.body for form posts
-app.use(serveStatic("./public"));      // falls through when no file matches
+app.use(text());                       // req.body as a string for text/plain
+app.use(raw());                        // req.body as a Buffer for application/octet-stream
+app.use(serveStatic("./public", {      // falls through when no file matches
+  maxAge: "1d",                        // Cache-Control (number in ms or "12h", "30m", ...)
+  // immutable: true, etag: true, lastModified: true, dotfiles: "ignore", index: "index.html",
+  // setHeaders: (res, path) => res.set("X-Static", "1"),
+}));
 app.use("/admin", requireAuth);        // path-scoped
 
 app.get("/notes/:id", (req) => {
@@ -161,7 +180,9 @@ app.use((err, req, res, next) => {
 });
 ```
 
-Anything unhandled falls back to a built-in 404 / error responder.
+Anything unhandled falls back to a built-in 404 / error responder. Body
+parsers reject oversized bodies with a 413 as soon as the limit is crossed,
+even without a `Content-Length` header.
 
 ## Testing without a server
 

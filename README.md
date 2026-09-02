@@ -3,7 +3,7 @@
 A lightweight, zero-dependency, Express-like framework for Bun — plus a demo app that showcases it.
 
 ```
-packages/expressy-bun/   The library (≈600 lines of TypeScript, no dependencies, no build step)
+packages/expressy-bun/   The library (≈2,000 lines of TypeScript, no dependencies, no build step)
 demo/                Notes app: REST API + static frontend built with the library
 ```
 
@@ -11,7 +11,7 @@ demo/                Notes app: REST API + static frontend built with the librar
 
 ```sh
 bun install        # links the workspace
-bun test           # run the library's test suite (51 tests)
+bun test           # run the library's test suite (82 tests)
 bun run demo       # start the demo at http://localhost:3000 (hot reload)
 ```
 

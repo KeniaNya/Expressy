@@ -1,6 +1,6 @@
 import type { Server } from "bun";
 import { resolve } from "node:path";
-import { Router, type Handler } from "./router";
+import { Router, type Handler, type PathPattern } from "./router";
 import { ExpressyRequest } from "./request";
 import { ExpressyResponse, type RenderCallback } from "./response";
 import { HttpError } from "./errors";
@@ -36,19 +36,25 @@ export class App extends Router {
   constructor() {
     super();
     this.settings.set("views", resolve("views"));
+    this.settings.set("env", process.env.NODE_ENV ?? "development");
   }
 
   /** Assign a setting: `app.set("view engine", "html")`, `app.set("trust proxy", 1)`. */
   set(name: string, value: unknown): this {
     this.settings.set(name, value);
+    // Routing settings apply to routes registered afterwards, as in Express.
+    if (name === "case sensitive routing") this._configure({ caseSensitive: Boolean(value) });
+    if (name === "strict routing") this._configure({ strict: Boolean(value) });
     return this;
   }
 
   /** Read an app setting (single argument) or register a GET route, like Express. */
   get(setting: string): any;
-  get(path: string, ...handlers: Handler[]): this;
-  get(pathOrSetting: string, ...handlers: Handler[]): any {
-    if (handlers.length === 0) return this.settings.get(pathOrSetting);
+  get(path: PathPattern, ...handlers: Handler[]): this;
+  get(pathOrSetting: PathPattern, ...handlers: Handler[]): any {
+    if (handlers.length === 0 && typeof pathOrSetting === "string") {
+      return this.settings.get(pathOrSetting);
+    }
     return super.get(pathOrSetting, ...handlers);
   }
 
@@ -110,6 +116,8 @@ export class App extends Router {
     return new Promise<Response>((resolve) => {
       res._onFinish = (response) => {
         if (req.method === "HEAD" && response.body) {
+          // Release the unused body (a file or user stream) instead of leaking it.
+          void response.body.cancel().catch(() => {});
           resolve(new Response(null, response));
         } else {
           resolve(response);

@@ -1,5 +1,6 @@
 import type { BunFile } from "bun";
 import { STATUS_CODES } from "node:http";
+import { basename, resolve } from "node:path";
 import type { App } from "./application";
 import type { ExpressyRequest } from "./request";
 
@@ -14,10 +15,21 @@ const TYPE_SHORTHANDS: Record<string, string> = {
   bin: "application/octet-stream",
 };
 
+/** Resolve a Content-Type from a shorthand, an extension (".png"), or a full MIME type. */
+function mimeOf(type: string): string {
+  const key = type.startsWith(".") ? type.slice(1) : type;
+  const known = TYPE_SHORTHANDS[key];
+  if (known) return known;
+  if (type.includes("/")) return type;
+  // Bun knows the MIME table; `.type` is computed from the extension, no I/O.
+  return Bun.file(`x.${key}`).type;
+}
+
 // These status codes must not carry a body.
 const EMPTY_STATUS = new Set([101, 204, 205, 304]);
 
 export interface CookieOptions {
+  /** Lifetime in milliseconds (sets both `Max-Age` and `Expires`, like Express). */
   maxAge?: number;
   expires?: Date;
   path?: string;
@@ -25,6 +37,13 @@ export interface CookieOptions {
   secure?: boolean;
   httpOnly?: boolean;
   sameSite?: "Strict" | "Lax" | "None" | "strict" | "lax" | "none";
+}
+
+export interface SendFileOptions {
+  /** Directory relative paths are resolved against. Default: the working directory. */
+  root?: string;
+  /** Extra headers to set on the response. */
+  headers?: Record<string, string>;
 }
 
 export type RenderCallback = (err: unknown, html?: string) => void;
@@ -100,6 +119,11 @@ export class ExpressyResponse {
     return this;
   }
 
+  /** Express alias for `res.set`. */
+  header(field: string | Record<string, string>, value?: string): this {
+    return this.set(field, value);
+  }
+
   get(field: string): string | undefined {
     return this.headers.get(field) ?? undefined;
   }
@@ -134,17 +158,62 @@ export class ExpressyResponse {
     return this.headers.has(field);
   }
 
-  /** Set the Content-Type. Accepts shorthands ("json", "html", ...) or full MIME types. */
+  /** Set the Content-Type. Accepts shorthands ("json", "html"), extensions (".png") or full MIME types. */
   type(type: string): this {
-    this.headers.set("Content-Type", TYPE_SHORTHANDS[type] ?? type);
+    this.headers.set("Content-Type", mimeOf(type));
+    return this;
+  }
+
+  /** Add a field to the `Vary` header (no duplicates; `*` wins). */
+  vary(field: string): this {
+    const current = this.headers.get("Vary");
+    if (!current) {
+      this.headers.set("Vary", field);
+      return this;
+    }
+    const fields = current.split(",").map((f) => f.trim().toLowerCase());
+    if (fields.includes("*")) return this;
+    if (!fields.includes(field.toLowerCase())) this.headers.set("Vary", `${current}, ${field}`);
+    return this;
+  }
+
+  /** Set the `Location` header without sending. */
+  location(url: string): this {
+    this.headers.set("Location", url);
+    return this;
+  }
+
+  /**
+   * Mark the response as a download: sets `Content-Disposition: attachment`
+   * and, when a filename is given, the Content-Type from its extension.
+   */
+  attachment(filename?: string): this {
+    if (filename) {
+      this.type(filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "bin");
+      // Header values must be ASCII: non-ASCII characters become "?" in the
+      // plain filename, and the RFC 5987 `filename*` carries the real name.
+      const safe = basename(filename).replace(/["\\\r\n]/g, "_").replace(/[^\x20-\x7e]/g, "?");
+      const encoded = encodeURIComponent(basename(filename));
+      this.headers.set(
+        "Content-Disposition",
+        `attachment; filename="${safe}"; filename*=UTF-8''${encoded}`,
+      );
+    } else {
+      this.headers.set("Content-Disposition", "attachment");
+    }
     return this;
   }
 
   cookie(name: string, value: string, options: CookieOptions = {}): this {
     let cookie = `${name}=${encodeURIComponent(value)}`;
     cookie += `; Path=${options.path ?? "/"}`;
-    if (options.maxAge !== undefined) cookie += `; Max-Age=${Math.floor(options.maxAge / 1000)}`;
-    if (options.expires) cookie += `; Expires=${options.expires.toUTCString()}`;
+    let expires = options.expires;
+    if (options.maxAge !== undefined) {
+      // Like Express: Max-Age in seconds plus a matching Expires for old clients.
+      cookie += `; Max-Age=${Math.floor(options.maxAge / 1000)}`;
+      expires ??= new Date(Date.now() + options.maxAge);
+    }
+    if (expires) cookie += `; Expires=${expires.toUTCString()}`;
     if (options.domain) cookie += `; Domain=${options.domain}`;
     if (options.secure) cookie += "; Secure";
     if (options.httpOnly) cookie += "; HttpOnly";
@@ -154,7 +223,9 @@ export class ExpressyResponse {
   }
 
   clearCookie(name: string, options: CookieOptions = {}): this {
-    return this.cookie(name, "", { ...options, expires: new Date(0) });
+    // A lingering maxAge would resurrect the cookie; drop it, like Express does.
+    const { maxAge: _maxAge, ...rest } = options;
+    return this.cookie(name, "", { ...rest, expires: new Date(0) });
   }
 
   json(data: unknown): void {
@@ -222,15 +293,25 @@ export class ExpressyResponse {
     }
   }
 
-  /** Send a file from disk. Content-Type is inferred from the extension. */
-  async sendFile(path: string): Promise<void> {
-    const file = Bun.file(path);
+  /**
+   * Send a file from disk. Content-Type is inferred from the extension.
+   * A missing file rejects with a 404-status error, so `await`/`return` it.
+   */
+  async sendFile(path: string, options: SendFileOptions = {}): Promise<void> {
+    const file = Bun.file(options.root ? resolve(options.root, path) : path);
     if (!(await file.exists())) {
       const err = new Error(`File not found: ${path}`) as Error & { status: number };
       err.status = 404;
       throw err;
     }
+    if (options.headers) this.set(options.headers);
     this.send(file);
+  }
+
+  /** Send a file as an attachment. The download name defaults to the file's basename. */
+  download(path: string, filename?: string, options: SendFileOptions = {}): Promise<void> {
+    this.attachment(filename ?? basename(path));
+    return this.sendFile(path, options);
   }
 
   /**
